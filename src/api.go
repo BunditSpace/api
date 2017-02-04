@@ -87,6 +87,11 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.Logger())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.POST},
+	}))
+
 	e.GET("/", index)
 	e.GET("/users", getUsers)
 	e.GET("/users/:id", getUserByID)
