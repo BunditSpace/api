@@ -1,0 +1,4 @@
+
+export GOPATH =E:\node\api
+export GOBIN =E:\node\api\bin
+export GOROOT =C:\Go\
