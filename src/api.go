@@ -42,6 +42,14 @@ func getUserByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+func deleteUserByID(c echo.Context) error {
+	user := new(models.User)
+	id := c.Param("id")
+	user.ID = bson.ObjectIdHex(id)
+	user.DeleteByID()
+	return c.NoContent(http.StatusOK)
+}
+
 func saveUser(c echo.Context) error {
 	user := new(models.User)
 	err := c.Bind(user)
@@ -50,6 +58,19 @@ func saveUser(c echo.Context) error {
 	}
 	user.SaveToDB()
 	return c.NoContent(http.StatusCreated)
+}
+
+func updateUserByID(c echo.Context) error {
+	user := new(models.User)
+	id := c.Param("id")
+	user.ID = bson.ObjectIdHex(id)
+
+	err := c.Bind(user)
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	user.UpdateByID()
+	return c.NoContent(http.StatusOK)
 }
 
 func init() {
@@ -77,6 +98,8 @@ func main() {
 	e.GET("/users", getUsers)
 	e.GET("/users/:id", getUserByID)
 	e.POST("/users", saveUser)
+	e.DELETE("/users/:id", deleteUserByID)
+	e.PUT("/users/:id", updateUserByID)
 
 	e.Logger.Fatal(e.Start(APISERVER))
 }

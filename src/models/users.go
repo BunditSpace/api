@@ -44,3 +44,22 @@ func (u *User) ReadByID() (*User, error) {
 	}
 	return u, nil
 }
+
+//DeleteByID delete only one by ID
+func (u *User) DeleteByID() error {
+	err := db.UsersCollection.RemoveId(u.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//UpdateByID vv
+func (u *User) UpdateByID() error {
+	change := bson.M{"$set": &u}
+	err := db.UsersCollection.UpdateId(u.ID, change)
+	if err != nil {
+		return err
+	}
+	return nil
+}
