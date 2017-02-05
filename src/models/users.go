@@ -63,3 +63,16 @@ func (u *User) UpdateByID() error {
 	}
 	return nil
 }
+
+//Login check username and password
+func (u *User) Login() (*User, error) {
+	err := db.UsersCollection.Find(bson.M{
+		"username": u.Username,
+		"password": u.Password,
+	}).One(&u)
+
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}

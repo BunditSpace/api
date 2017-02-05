@@ -73,6 +73,20 @@ func updateUserByID(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+func login(c echo.Context) error {
+	user := new(models.User)
+	err := c.Bind(user)
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	result, err := user.Login()
+	if err != nil {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
 func init() {
 	mongoSession, err := mgo.Dial(DATABASESERVER)
 	if err != nil {
@@ -100,6 +114,7 @@ func main() {
 	e.POST("/users", saveUser)
 	e.DELETE("/users/:id", deleteUserByID)
 	e.PUT("/users/:id", updateUserByID)
+	e.POST("/login", login)
 
 	e.Logger.Fatal(e.Start(APISERVER))
 }
