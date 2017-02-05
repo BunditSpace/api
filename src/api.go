@@ -6,42 +6,19 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+
+	"./models"
+
+	db "./helper/db"
 )
 
-var (
-	//MongoSession s
-	MongoSession *mgo.Session
-	//UsersCollection s
-	UsersCollection *mgo.Collection
+const (
+	APISERVER          = ":1323"
+	DATABASESERVER     = "localhost:27017"
+	DATABASENAME       = "maejo"
+	DATABASECOLLECTION = "users"
 )
-
-//User object user data
-type User struct {
-	Firstname string `json:"firstname,omitempty"`
-	Lastname  string `json:"lastname,omitempty"`
-	UserName  string `json:"username,omitempty"`
-	Password  string `json:"password,omitempty"`
-}
-
-//SaveToDB s
-func (u *User) SaveToDB() error {
-	err := UsersCollection.Insert(&u)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-//ReadFromDB r
-func (u *User) ReadFromDB() ([]User, error) {
-	result := []User{}
-	err := UsersCollection.Find(nil).All(&result)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
 
 func index(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Hello, World!")
@@ -49,7 +26,7 @@ func index(c echo.Context) error {
 
 func getUsers(c echo.Context) error {
 
-	user := new(User)
+	user := new(models.User)
 	result, err := user.ReadFromDB()
 	if err != nil {
 		return err
@@ -58,12 +35,15 @@ func getUsers(c echo.Context) error {
 }
 
 func getUserByID(c echo.Context) error {
+	user := new(models.User)
 	id := c.Param("id")
-	return c.JSON(http.StatusOK, id)
+	user.ID = bson.ObjectIdHex(id)
+	result, _ := user.ReadByID()
+	return c.JSON(http.StatusOK, result)
 }
 
 func saveUser(c echo.Context) error {
-	user := new(User)
+	user := new(models.User)
 	err := c.Bind(user)
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
@@ -73,17 +53,18 @@ func saveUser(c echo.Context) error {
 }
 
 func init() {
-	MongoSession, err := mgo.Dial("localhost:27017")
+	mongoSession, err := mgo.Dial(DATABASESERVER)
 	if err != nil {
 		panic(err)
 	}
 
-	MongoSession.SetMode(mgo.Monotonic, true)
-	UsersCollection = MongoSession.DB("maejo").C("users")
+	mongoSession.SetMode(mgo.Monotonic, true)
+	db.MongoSession = mongoSession
+	db.UsersCollection = db.MongoSession.DB(DATABASENAME).C(DATABASECOLLECTION)
 }
 
 func main() {
-	defer MongoSession.Close()
+	defer db.MongoSession.Close()
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -97,5 +78,5 @@ func main() {
 	e.GET("/users/:id", getUserByID)
 	e.POST("/users", saveUser)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(APISERVER))
 }
