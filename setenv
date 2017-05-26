@@ -1,4 +1,4 @@
 
-export GOPATH=/e/node/api
-export GOBIN=/e/node/api/bin
+export GOPATH=/d/Learning/GoLang/CURD/api
+export GOBIN=/d/Learning/GoLang/CURD/api/bin
 export GOROOT=/c/Go

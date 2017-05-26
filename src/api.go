@@ -15,9 +15,11 @@ import (
 
 const (
 	APISERVER          = ":1323"
-	DATABASESERVER     = "localhost:27017"
+	DATABASESERVER     = "ds151461.mlab.com:51461"
 	DATABASENAME       = "maejo"
 	DATABASECOLLECTION = "users"
+	AuthUserName = "mju"
+	AuthPassword = "mju"
 )
 
 func index(c echo.Context) error {
@@ -88,7 +90,15 @@ func login(c echo.Context) error {
 }
 
 func init() {
-	mongoSession, err := mgo.Dial(DATABASESERVER)
+
+	mongoDBDialInfo := &mgo.DialInfo{
+		Addrs:    []string{DATABASESERVER},
+		Database: DATABASENAME,
+		Username: AuthUserName,
+		Password: AuthPassword,
+	}
+	
+	mongoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
 	if err != nil {
 		panic(err)
 	}
